@@ -1,4 +1,4 @@
-package com.forum.hub.controller.dto;
+package com.forum.hub.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
