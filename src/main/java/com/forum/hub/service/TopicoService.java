@@ -2,12 +2,14 @@ package com.forum.hub.service;
 
 import com.forum.hub.dto.TopicoCreateDTO;
 import com.forum.hub.dto.TopicoResponseDTO;
+import com.forum.hub.model.StatusTopico;
 import com.forum.hub.model.Topico;
 import com.forum.hub.repository.TopicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -26,6 +28,8 @@ public class TopicoService {
                 .mensagem(request.mensagem())
                 .autor(request.autor())
                 .curso(request.curso())
+                .dataCriacao(LocalDateTime.now())
+                .status(StatusTopico.NAO_RESPONDIDO)
                 .build();
 
         return toResponse(repository.save(topico));
