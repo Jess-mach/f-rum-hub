@@ -1,12 +1,11 @@
-package com.forum.hub.service;
+package com.forum.hub.model.topico;
 
-import com.forum.hub.dto.TopicoCreateDTO;
-import com.forum.hub.dto.TopicoResponseDTO;
-import com.forum.hub.model.StatusTopico;
-import com.forum.hub.model.Topico;
-import com.forum.hub.repository.TopicoRepository;
+import com.forum.hub.model.usuario.Usuario;
+import com.forum.hub.model.usuario.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,7 +17,13 @@ public class TopicoService {
     @Autowired
     private TopicoRepository repository;
 
-    public TopicoResponseDTO cadastrar(TopicoCreateDTO request) {
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    public TopicoResponseDTO cadastrar(TopicoCreateDTO request, UserDetails userDetails) {
+        Usuario autor = Optional.of((Usuario) userDetails)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+
         if (repository.existsByTituloAndMensagem(request.titulo(), request.mensagem())) {
             throw new IllegalArgumentException("Tópico duplicado.");
         }
@@ -26,7 +31,7 @@ public class TopicoService {
         Topico topico = Topico.builder()
                 .titulo(request.titulo())
                 .mensagem(request.mensagem())
-                .autor(request.autor())
+                .autor(autor)
                 .curso(request.curso())
                 .dataCriacao(LocalDateTime.now())
                 .status(StatusTopico.NAO_RESPONDIDO)
@@ -38,7 +43,7 @@ public class TopicoService {
     public Page<TopicoResponseDTO> listar(Pageable pageable, String curso) {
         Page<Topico> pagina = (curso == null || curso.isBlank())
                 ? repository.findAll(pageable)
-                : new PageImpl<>(repository.findByCursoContainingIgnoreCase(curso), pageable, 0);
+                : repository.findByCursoContainingIgnoreCase(curso, pageable);
 
         return pagina.map(this::toResponse);
     }
@@ -47,22 +52,38 @@ public class TopicoService {
         return repository.findById(id).map(this::toResponse);
     }
 
-    public Optional<TopicoResponseDTO> atualizar(Long id, TopicoCreateDTO request) {
-        return repository.findById(id).map(topico -> {
+    public TopicoResponseDTO atualizar(Long id, TopicoCreateDTO request) {
+        Optional<Topico> byId = repository.findById(id);
+
+        if (byId.isPresent()) {
+            Topico topico = byId.get();
+
             topico.setTitulo(request.titulo());
             topico.setMensagem(request.mensagem());
-            topico.setAutor(request.autor());
             topico.setCurso(request.curso());
+
             return toResponse(repository.save(topico));
-        });
+        }
+
+        throw new EntityNotFoundException("Registro não encontrado");
+
     }
 
-    public boolean excluir(Long id) {
-        if (repository.existsById(id)) {
+    public void excluir(Long id) {
+        Optional<Topico> byId = repository.findById(id);
+
+        if (byId.isPresent()) {
             repository.deleteById(id);
-            return true;
+        } else
+            throw new EntityNotFoundException("Registro não encontrado");
+
+        if(false) {
+            repository.findById(id)
+                    .ifPresentOrElse(r -> repository.deleteById(r.getId()),
+                            () -> {
+                                throw new EntityNotFoundException("Registro não encontrado");
+                            });
         }
-        return false;
     }
 
     private TopicoResponseDTO toResponse(Topico topico) {
@@ -72,7 +93,7 @@ public class TopicoService {
                 topico.getMensagem(),
                 topico.getDataCriacao(),
                 topico.getStatus(),
-                topico.getAutor(),
+                topico.getAutor().getUsername(),
                 topico.getCurso()
         );
     }

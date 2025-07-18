@@ -1,12 +1,9 @@
-package com.forum.hub.repository;
+package com.forum.hub.model.topico;
 
-import com.forum.hub.model.Topico;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 public interface TopicoRepository extends JpaRepository<Topico, Long> {
 
@@ -17,6 +14,6 @@ public interface TopicoRepository extends JpaRepository<Topico, Long> {
             "(:ano IS NULL OR FUNCTION('YEAR', t.dataCriacao) = :ano)")
     Page<Topico> buscarPorCursoEAno(@Param("curso") String curso, @Param("ano") Integer ano, Pageable pageable);
 
-    List<Topico> findByCursoContainingIgnoreCase(String curso);
+    Page<Topico> findByCursoContainingIgnoreCase(String curso, Pageable pageable);
 }
 

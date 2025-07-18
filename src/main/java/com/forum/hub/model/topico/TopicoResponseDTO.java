@@ -1,5 +1,4 @@
-package com.forum.hub.dto;
-import com.forum.hub.model.StatusTopico;
+package com.forum.hub.model.topico;
 
 import java.time.LocalDateTime;
 
