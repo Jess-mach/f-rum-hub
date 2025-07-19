@@ -1,5 +1,6 @@
 package com.forum.hub.model.resposta;
 
+import com.forum.hub.exception.UserUnauthorizedException;
 import com.forum.hub.model.topico.Topico;
 import com.forum.hub.model.topico.TopicoRepository;
 import com.forum.hub.model.usuario.Usuario;
@@ -12,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static com.forum.hub.model.topico.StatusTopico.SOLUCIONADO;
 
 @Service
 public class RespostaService {
@@ -46,4 +49,23 @@ public class RespostaService {
     }
 
 
+    public void solucao (Long id, UserDetails userDetails) {
+
+        Resposta resposta = respostaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Resposta não encontrada"));
+
+        Usuario usuario = Optional.of((Usuario) userDetails)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+
+        if (!usuario.equals(resposta.getTopico().getAutor()) && !usuario.getPerfis().equals("INSTRUTOR")) {
+
+            throw new UserUnauthorizedException("Somente o autor ou um professor pode marcar como solução.");
+        }
+
+        resposta.setSolucao(true);
+        resposta.getTopico().setStatus(SOLUCIONADO);
+
+        respostaRepository.save(resposta);
+
+    }
 }

@@ -1,5 +1,6 @@
 package com.forum.hub.model.topico;
 
+import com.forum.hub.model.resposta.DadosDetalhamentoResposta;
 import com.forum.hub.model.usuario.Usuario;
 import com.forum.hub.model.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -49,7 +50,7 @@ public class TopicoService {
     }
 
     public Optional<TopicoResponseDTO> detalhar(Long id) {
-        return repository.findById(id).map(this::toResponse);
+        return repository.findById(id).map(this::toResponseResposta);
     }
 
     public TopicoResponseDTO atualizar(Long id, TopicoCreateDTO request) {
@@ -86,15 +87,38 @@ public class TopicoService {
         }
     }
 
+    private TopicoResponseDTO toResponseResposta(Topico topico) {
+        return TopicoResponseDTO.builder()
+                .id(topico.getId())
+                .titulo(topico.getTitulo())
+                .mensagem(topico.getMensagem())
+                .dataCriacao(topico.getDataCriacao())
+                .status(topico.getStatus())
+                .autor(topico.getAutor().getUsername())
+                .curso(topico.getCurso())
+                .respostas(topico.getRespostas().stream()
+                        .map(resposta -> DadosDetalhamentoResposta.builder()
+                                .id(resposta.getId())
+                                .mensagem(resposta.getMensagem())
+                                .dataCriacao(resposta.getDataCriacao())
+                                .autor(resposta.getAutor().getUsername())
+                                .solucao(resposta.isSolucao())
+                                .build())
+                        .toList())
+                .build();
+
+    }
+
     private TopicoResponseDTO toResponse(Topico topico) {
-        return new TopicoResponseDTO(
-                topico.getId(),
-                topico.getTitulo(),
-                topico.getMensagem(),
-                topico.getDataCriacao(),
-                topico.getStatus(),
-                topico.getAutor().getUsername(),
-                topico.getCurso()
-        );
+        return TopicoResponseDTO.builder()
+                .id(topico.getId())
+                .titulo(topico.getTitulo())
+                .mensagem(topico.getMensagem())
+                .dataCriacao(topico.getDataCriacao())
+                .status(topico.getStatus())
+                .autor(topico.getAutor().getUsername())
+                .curso(topico.getCurso())
+                .build();
+
     }
 }

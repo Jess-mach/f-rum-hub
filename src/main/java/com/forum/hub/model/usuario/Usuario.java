@@ -1,10 +1,7 @@
 package com.forum.hub.model.usuario;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,8 +19,19 @@ public class Usuario implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Setter
+    private String nome;
+
+    @Setter
     private String login;
+
+    @Setter
     private String senha;
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private Perfis perfis;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

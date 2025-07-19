@@ -1,7 +1,7 @@
 package com.forum.hub.controller;
 
-import com.forum.hub.model.usuario.Usuario;
-import com.forum.hub.model.usuario.UsuarioRepository;
+import com.forum.hub.model.usuario.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,30 +9,31 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/usuario")
+@SecurityRequirement(name = "bearer-key")
 public class UsuarioController {
 
     @Autowired
-    private UsuarioRepository repository;
+    private UsuarioService service;
 
     @GetMapping
-    public List<Usuario> listar() {
-        return repository.findAll();
+    public List<UsuarioResponseDTO> listar() {
+        return service.findAll();
     }
 
     @PostMapping
-    public Usuario cadastrar(@RequestBody Usuario usuario) {
-        return repository.save(usuario);
+    public UsuarioResponseDTO cadastrar(@RequestBody UsuarioCreateDTO usuario) {
+        return service.save(usuario);
     }
 
     @PutMapping("/{id}")
-    public Usuario atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+    public UsuarioResponseDTO atualizar(@PathVariable Long id, @RequestBody UsuarioCreateDTO usuario) {
 
-        return repository.save(usuario);
+        return service.update(usuario, id);
     }
 
     @DeleteMapping("/{id}")
     public void deletar(@PathVariable Long id) {
-        repository.deleteById(id);
+        service.deleteById(id);
     }
 }
 

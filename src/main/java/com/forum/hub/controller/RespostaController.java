@@ -1,9 +1,10 @@
 package com.forum.hub.controller;
 
 
-import com.forum.hub.model.resposta.DadosCadastroResposta;
-import com.forum.hub.model.resposta.DadosDetalhamentoResposta;
-import com.forum.hub.model.resposta.RespostaService;
+import com.forum.hub.model.resposta.*;
+import com.forum.hub.model.usuario.Usuario;
+import com.forum.hub.model.usuario.UsuarioRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/respostas")
+@SecurityRequirement(name = "bearer-key")
 public class RespostaController {
 
     @Autowired
@@ -33,24 +35,14 @@ public class RespostaController {
                 .body(resposta);
     }
 
-//    @PutMapping("/{id}/solucao")
-//    @Transactional
-//    public ResponseEntity<?> marcarComoSolucao(@PathVariable Long id,
-//                                               @AuthenticationPrincipal UserDetails userDetails) {
-//        Optional<Resposta> resposta = respostaRepository.findById(id);
-//
-//        if (resposta.isEmpty()) return ResponseEntity.notFound().build();
-//
-//        Resposta r = resposta.get();
-//        Usuario usuario = usuarioRepository.findByLogin(userDetails.getUsername()).orElseThrow();
-//
-//        if (!usuario.equals(r.getTopico().getAutor()) && !usuario.getPapel().equals("PROFESSOR")) {
-//            return ResponseEntity.status(403).body("Somente o autor ou um professor pode marcar como solução.");
-//        }
-//
-//        r.setSolucao(true);
-//        r.getTopico().setResolvido(true);
-//
-//        return ResponseEntity.ok().build();
-//    }
+    @PutMapping("/{id}/solucao")
+    @Transactional
+    public ResponseEntity<?> marcarComoSolucao(@PathVariable Long id,
+                                               @AuthenticationPrincipal UserDetails userDetails) {
+        respostaService.solucao (id, userDetails);
+
+
+
+        return ResponseEntity.ok().build();
+    }
 }

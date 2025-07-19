@@ -1,7 +1,10 @@
 package com.forum.hub.model.resposta;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 
+@Builder
 public record DadosDetalhamentoResposta(
         Long id,
         String mensagem,

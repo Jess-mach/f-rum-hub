@@ -1,0 +1,5 @@
+
+
+ALTER TABLE usuario ADD COLUMN nome varchar(150) NOT NULL DEFAULT '';
+ALTER TABLE usuario ADD COLUMN perfis  varchar(200) NOT NULL DEFAULT 'ALUNO';
+

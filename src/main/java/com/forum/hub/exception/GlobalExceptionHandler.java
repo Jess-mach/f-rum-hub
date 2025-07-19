@@ -269,4 +269,19 @@ public class GlobalExceptionHandler {
             this(error.getField(), error.getDefaultMessage());
         }
     }
+
+    @ExceptionHandler(UserUnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handlerUserUnauthorizedException(
+            UserUnauthorizedException ex, WebRequest request) {
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .error("Acesso Negado")
+                .message("Você não tem permissão para acessar este recurso")
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
 }
