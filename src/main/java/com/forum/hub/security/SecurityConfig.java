@@ -23,14 +23,16 @@ public class SecurityConfig {
     private SecurityFilter securityFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityFilter filter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login").permitAll()
-                        .anyRequest().authenticated()
-                )
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(req -> {
+                    req.requestMatchers(HttpMethod.POST, "/login").permitAll();
+                    req.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
+                    req.anyRequest().authenticated();
+                })
                 // MEU FILTRO É EXECUTADO PRIMEIRO - ANTES DO SPRING SECURITY
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
